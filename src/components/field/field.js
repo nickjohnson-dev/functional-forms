@@ -26,6 +26,8 @@ export class Field extends React.Component {
       onKeyDown: this.handleKeyDown,
       onKeyPress: this.handleKeyPress,
       onKeyUp: this.handleKeyUp,
+      onMouseDown: this.handleMouseDown,
+      onMouseUp: this.handleMouseUp,
       value: this.props.field.value,
     });
   }
@@ -105,5 +107,15 @@ export class Field extends React.Component {
   handleKeyUp = (e) => {
     if (!_.isFunction(this.props.field.onKeyUp)) return;
     this.props.field.onKeyUp(e);
+  };
+
+  handleMouseDown = (e) => {
+    if (!_.isFunction(this.props.field.onMouseDown)) return;
+    this.props.field.onMouseDown(e);
+  };
+
+  handleMouseUp = (e) => {
+    if (!_.isFunction(this.props.field.onMouseUp)) return;
+    this.props.field.onMouseUp(e);
   };
 }

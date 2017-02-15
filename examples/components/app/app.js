@@ -69,7 +69,9 @@ function getInitialFields() {
         ];
       },
       component: 'text',
-      onBlur: () => console.log('blurred!'),
+      onBlur: e => console.log('blurred!', e),
+      onClick: e => console.log('clicked!', e),
+      onMouseUp: e => console.log('mouse UPP!', e),
       value: 'Some Text',
     },
   ];

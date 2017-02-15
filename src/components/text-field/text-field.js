@@ -16,6 +16,8 @@ export class TextField extends React.Component {
     onKeyDown: React.PropTypes.func,
     onKeyPress: React.PropTypes.func,
     onKeyUp: React.PropTypes.func,
+    onMouseDown: React.PropTypes.func,
+    onMouseUp: React.PropTypes.func,
     value: React.PropTypes.any,
   };
 
@@ -37,6 +39,8 @@ export class TextField extends React.Component {
         onKeyDown: this.props.onKeyDown,
         onKeyPress: this.props.onKeyPress,
         onKeyUp: this.props.onKeyUp,
+        onMouseDown: this.props.onMouseDown,
+        onMouseUp: this.props.onMouseUp,
         type: 'text',
         value: this.props.value,
       }),
