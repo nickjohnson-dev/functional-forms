@@ -29,17 +29,47 @@ export class App extends React.Component {
     this.setState({ fields: log(fields, 'Fields Change') });
 }
 
+class CustomComp extends React.PureComponent {
+  render() {
+    return h('div', [
+      `A Custom Class Component! ${this.props.value}`,
+      h('button', {
+        onClick: () => this.props.onChange('A'),
+      }, ['Set A']),
+      h('button', {
+        onClick: () => this.props.onChange('B'),
+      }, ['Set B']),
+    ]);
+  }
+}
+
 function getInitialFields() {
   return [
     {
       id: 'custom',
-      component: () => h('div', [
-        'This component is being rendered as a field',
+      component: props => h('div', {
+        onClick: () => props.onChange(!props.value),
+      }, [
+        `Custom Component Value: ${props.value}`,
       ]),
+      value: false,
     },
     {
-      id: 'sample text',
+      id: 'custom2',
+      component: CustomComp,
+      value: 'WITH A CRAZY VALUE!',
+    },
+    {
+      id: 'Favorite Food',
+      getErrors: (value) => {
+        console.log('checking val', value);
+        return value === 'Tacos' ? [] : [
+          'Should be "Tacos"',
+          'THIS IS IMPORTANT',
+        ];
+      },
       component: 'text',
+      onBlur: () => console.log('blurred!'),
       value: 'Some Text',
     },
   ];
@@ -53,6 +83,5 @@ function log(value, label) {
     // eslint-disable-next-line no-console
     console.log(value);
   }
-
   return value;
 }

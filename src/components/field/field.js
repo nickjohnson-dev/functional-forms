@@ -1,16 +1,12 @@
+import _ from 'lodash/fp';
 import React from 'react';
 import h from 'react-hyperscript';
-import StylePropType from 'react-style-proptype';
-import { getTextField } from '../text-field/text-field';
+import { TextField } from '../text-field/text-field';
 
-export class Form extends React.Component {
+export class Field extends React.Component {
   static propTypes = {
-    className: React.PropTypes.string,
-    fields: React.PropTypes.arrayOf(
-      React.PropTypes.object,
-    ),
-    onFieldsChange: React.PropTypes.func,
-    style: StylePropType,
+    field: React.PropTypes.object,
+    onFieldChange: React.PropTypes.func,
   };
 
   static defaultProps = {
@@ -19,12 +15,95 @@ export class Form extends React.Component {
 
   render() {
     return h(this.getComponent(), {
-      className: this.props.className,
-      field: this.props.field,
-      onFieldChange: this.props.onFieldChange,
-      style: this.props.style,
+      errors: this.getErrors(),
+      isTouched: this.props.field.isTouched || false,
+      label: this.getLabel(),
+      onBlur: this.handleBlur,
+      onChange: this.handleChange,
+      onClick: this.handleClick,
+      onFocus: this.handleFocus,
+      onIsTouchedChange: this.handleIsTouchedChange,
+      onKeyDown: this.handleKeyDown,
+      onKeyPress: this.handleKeyPress,
+      onKeyUp: this.handleKeyUp,
+      value: this.props.field.value,
     });
   }
 
-  handleFieldChange = field => this.props.onFieldChange(field);
+  getComponentByType = type => ({
+    text: TextField,
+  })[type];
+
+  getComponent = () => {
+    if (_.isNil(this.props.field.id)) {
+      throw new Error('Fields must have an id property');
+    }
+
+    if (_.isString(this.props.field.component)) {
+      return this.getComponentByType(this.props.field.component);
+    }
+
+    if (_.isFunction(this.props.field.component)) {
+      return this.props.field.component;
+    }
+
+    throw new Error('Field component must be a valid type string or a React component.');
+  };
+
+  getErrors = () => {
+    if (this.props.field.isValid) {
+      return [];
+    }
+
+    if (_.isFunction(this.props.field.getErrors)) {
+      return this.props.field.getErrors(this.props.field.value);
+    }
+
+    return [];
+  }
+
+  getLabel = () =>
+    this.props.field.label || this.props.field.id;
+
+  handleBlur = (e) => {
+    if (!_.isFunction(this.props.field.onBlur)) return;
+    this.props.field.onBlur(e);
+  }
+
+  handleChange = value =>
+    this.props.onFieldChange({
+      ...this.props.field,
+      value,
+    });
+
+  handleClick = (e) => {
+    if (!_.isFunction(this.props.field.onClick)) return;
+    this.props.field.onClick(e);
+  };
+
+  handleFocus = (e) => {
+    if (!_.isFunction(this.props.field.onFocus)) return;
+    this.props.field.onFocus(e);
+  };
+
+  handleIsTouchedChange = isTouched =>
+    this.props.onFieldChange({
+      ...this.props.field,
+      isTouched,
+    });
+
+  handleKeyDown = (e) => {
+    if (!_.isFunction(this.props.field.onKeyDown)) return;
+    this.props.field.onKeyDown(e);
+  };
+
+  handleKeyPress = (e) => {
+    if (!_.isFunction(this.props.field.onKeyPress)) return;
+    this.props.field.onKeyPress(e);
+  };
+
+  handleKeyUp = (e) => {
+    if (!_.isFunction(this.props.field.onKeyUp)) return;
+    this.props.field.onKeyUp(e);
+  };
 }
