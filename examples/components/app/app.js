@@ -10,7 +10,7 @@ export class App extends React.Component {
   };
 
   state = {
-    fields: getFields(),
+    fields: getInitialFields(),
   };
 
   render() {
@@ -26,11 +26,33 @@ export class App extends React.Component {
   }
 
   handleFormFieldsChange = fields =>
-    this.setState({ fields });
+    this.setState({ fields: log(fields, 'Fields Change') });
 }
 
-function getFields() {
+function getInitialFields() {
   return [
-    {},
+    {
+      id: 'custom',
+      component: () => h('div', [
+        'This component is being rendered as a field',
+      ]),
+    },
+    {
+      id: 'sample text',
+      component: 'text',
+      value: 'Some Text',
+    },
   ];
+}
+
+function log(value, label) {
+  if (label) {
+    // eslint-disable-next-line no-console
+    console.log(label, value);
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(value);
+  }
+
+  return value;
 }
