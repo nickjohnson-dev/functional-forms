@@ -1,6 +1,6 @@
 {
   "name": "functional-forms",
-  "version": "1.0.0-0",
+  "version": "1.0.0-1",
   "description": "Dynamic declarative forms for React",
   "main": "dist/index.js",
   "scripts": {
