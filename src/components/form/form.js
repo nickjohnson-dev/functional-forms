@@ -9,7 +9,7 @@ export class Form extends React.Component {
     className: React.PropTypes.string,
     fields: React.PropTypes.arrayOf(
       React.PropTypes.object,
-    ),
+    ).isRequired,
     onFieldsChange: React.PropTypes.func,
     style: StylePropType,
   };
@@ -24,6 +24,7 @@ export class Form extends React.Component {
       style: this.props.style,
     }, [
       this.props.fields.map(field => h(Field, {
+        className: 'ff-form__field',
         key: field.id,
         onFieldChange: this.handleFieldChange,
         field,

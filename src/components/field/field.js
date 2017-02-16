@@ -5,8 +5,9 @@ import { TextField } from '../text-field/text-field';
 
 export class Field extends React.Component {
   static propTypes = {
-    field: React.PropTypes.object,
-    onFieldChange: React.PropTypes.func,
+    className: React.PropTypes.string,
+    field: React.PropTypes.object.isRequired,
+    onFieldChange: React.PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -15,8 +16,9 @@ export class Field extends React.Component {
 
   render() {
     return h(this.getComponent(), {
+      className: this.props.className,
       errors: this.getErrors(),
-      isTouched: this.props.field.isTouched || false,
+      isTouched: !!this.props.field.isTouched,
       label: this.getLabel(),
       onBlur: this.handleBlur,
       onChange: this.handleChange,
@@ -32,9 +34,9 @@ export class Field extends React.Component {
     });
   }
 
-  getComponentByType = type => ({
+  getBuiltInComponent = () => ({
     text: TextField,
-  })[type];
+  })[this.props.field.component];
 
   getComponent = () => {
     if (_.isNil(this.props.field.id)) {
@@ -42,7 +44,7 @@ export class Field extends React.Component {
     }
 
     if (_.isString(this.props.field.component)) {
-      return this.getComponentByType(this.props.field.component);
+      return this.getBuiltInComponent();
     }
 
     if (_.isFunction(this.props.field.component)) {
