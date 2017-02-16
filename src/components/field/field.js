@@ -14,8 +14,22 @@ export class Field extends React.Component {
     field: {},
   };
 
+  componentDidMount() {
+    if (_.isNil(this.props.field.id)) {
+      throw new Error('Fields must have an id property');
+    }
+
+    if (!this.getHasValidComponent()) {
+      throw new Error(getInvalidComponentErrorMessage(this.props.field.component));
+    }
+  }
+
   render() {
-    return h(this.getComponent(), {
+    const component = this.getComponent();
+
+    if (!component) return null;
+
+    return h(component, {
       className: this.props.className,
       errors: this.getErrors(),
       isTouched: !!this.props.field.isTouched,
@@ -39,10 +53,6 @@ export class Field extends React.Component {
   })[this.props.field.component];
 
   getComponent = () => {
-    if (_.isNil(this.props.field.id)) {
-      throw new Error('Fields must have an id property');
-    }
-
     if (_.isString(this.props.field.component)) {
       return this.getBuiltInComponent();
     }
@@ -51,7 +61,7 @@ export class Field extends React.Component {
       return this.props.field.component;
     }
 
-    throw new Error('Field component must be a valid type string or a React component.');
+    return undefined;
   };
 
   getErrors = () => {
@@ -65,6 +75,12 @@ export class Field extends React.Component {
 
     return [];
   }
+
+  getHasValidComponent = () =>
+    _.isFunction(this.props.field.component) ||
+    _.includes([
+      'text',
+    ], this.props.field.component);
 
   getLabel = () =>
     this.props.field.label || this.props.field.id;
@@ -120,4 +136,9 @@ export class Field extends React.Component {
     if (!_.isFunction(this.props.field.onMouseUp)) return;
     this.props.field.onMouseUp(e);
   };
+}
+
+function getInvalidComponentErrorMessage(component) {
+  // eslint-disable-next-line max-len
+  return `Invalid field component value: ${component}. Field component must be a valid type string or a React component.`;
 }
