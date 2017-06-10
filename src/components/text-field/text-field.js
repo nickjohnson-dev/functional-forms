@@ -1,5 +1,8 @@
+import classnames from 'classnames';
 import getOr from 'lodash/fp/getOr';
+import isEmpty from 'lodash/fp/isEmpty';
 import noop from 'lodash/fp/noop';
+import some from 'lodash/fp/some';
 import React from 'react';
 import h from 'react-hyperscript';
 
@@ -13,16 +16,29 @@ export class TextField extends React.PureComponent {
     successClassName: React.PropTypes.string,
   };
 
-  getClassName = (status) => {
+  getClassName = () => {
     const errorClassName = getOr('', 'props.errorClassName', this);
     const successClassName = getOr('', 'props.successClassName', this);
+    const messages = this.getMessages();
+    const hasMessages = !isEmpty(messages);
+    const hasError = some(m => m.type === 'error', messages);
 
-    if (status.type === 'error') {
-      return errorClassName;
+    return classnames({
+      [errorClassName]: hasMessages && hasError,
+      [successClassName]: hasMessages && !hasError,
+    }, this.props.className);
+  }
+
+  getMessageClassName = (message) => {
+    const errorMessageClassName = getOr('', 'props.errorMessageClassName', this);
+    const successMessageClassName = getOr('', 'props.successMessageClassName', this);
+
+    if (message.type === 'error') {
+      return errorMessageClassName;
     }
 
-    if (status.type === 'success') {
-      return successClassName;
+    if (message.type === 'success') {
+      return successMessageClassName;
     }
 
     return '';
@@ -31,8 +47,8 @@ export class TextField extends React.PureComponent {
   getLabel = () =>
     getOr('', 'props.field.label', this);
 
-  getStatuses = () =>
-    getOr([], 'props.field.statuses', this);
+  getMessages = () =>
+    getOr([], 'props.field.messages', this);
 
   getValue = () =>
     getOr('', 'props.field.value', this);
@@ -109,7 +125,7 @@ export class TextField extends React.PureComponent {
 
   render() {
     return h('div', {
-      className: this.props.className,
+      className: this.getClassName(),
     }, [
       h('label', [
         this.getLabel(),
@@ -127,8 +143,8 @@ export class TextField extends React.PureComponent {
         type: 'text',
         value: this.getValue(),
       }),
-      this.getStatuses().map((status, index) => h('div', {
-        className: this.getClassName(status),
+      this.getMessages().map((status, index) => h('div', {
+        className: this.getMessageClassName(status),
         key: index,
       }, [
         status.message,

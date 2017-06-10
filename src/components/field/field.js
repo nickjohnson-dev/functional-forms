@@ -16,16 +16,16 @@ export class Field extends React.PureComponent {
     onFieldChange: React.PropTypes.func.isRequired,
   };
 
-  statusesPromise;
+  messagesPromise;
 
   componentWillReceiveProps(nextProps) {
     const fieldHasChanged = !isEqual(
-      omit(['statuses'], this.props.field),
-      omit(['statuses'], nextProps.field),
+      omit(['messages'], this.props.field),
+      omit(['messages'], nextProps.field),
     );
 
     if (fieldHasChanged) {
-      this.updateStatuses(nextProps.field);
+      this.updateMessages(nextProps.field);
     }
   }
 
@@ -55,7 +55,7 @@ export class Field extends React.PureComponent {
     });
 
     this.setState({
-      statuses: [],
+      messages: [],
     });
   };
 
@@ -80,37 +80,37 @@ export class Field extends React.PureComponent {
     });
   };
 
-  handleStatusesChange = debounce(100, (statuses) => {
+  handleMessagesChange = debounce(250, (messages) => {
     const field = getOr({}, 'props.field', this);
     const onFieldChange = getOr(noop, 'props.onFieldChange', this);
 
     onFieldChange({
       ...field,
-      statuses,
+      messages,
     });
   });
 
-  updateStatuses = (field) => {
-    this.statusesPromise = makeCancelable(new Promise((resolve) => {
-      if (this.statusesPromise) this.statusesPromise.cancel();
+  updateMessages = (field) => {
+    this.messagesPromise = makeCancelable(new Promise((resolve) => {
+      if (this.messagesPromise) this.messagesPromise.cancel();
 
-      const getStatuses = getOr(() => [], 'getStatuses', field);
-      const statuses = getStatuses(field);
+      const getMessages = getOr(() => [], 'getMessages', field);
+      const messages = getMessages(field);
 
-      if (statuses instanceof Promise) {
-        statuses.then(resolve);
+      if (messages instanceof Promise) {
+        messages.then(resolve);
         return;
       }
 
-      if (isArray(statuses)) {
-        resolve(statuses);
+      if (isArray(messages)) {
+        resolve(messages);
       }
 
       resolve([]);
     }));
 
-    this.statusesPromise.promise
-      .then(this.handleStatusesChange)
+    this.messagesPromise.promise
+      .then(this.handleMessagesChange)
       .catch(() => {});
   }
 

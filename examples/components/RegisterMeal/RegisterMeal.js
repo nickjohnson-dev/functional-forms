@@ -6,8 +6,11 @@ import { validateAsync } from '../../helpers';
 
 const Input = fieldProps => h(TextField, {
   ...fieldProps,
-  errorClassName: 'error',
-  successClassName: 'success',
+  className: 'input',
+  errorClassName: 'input--error',
+  errorMessageClassName: 'error',
+  successClassName: 'input--success',
+  successMessageClassName: 'success',
 });
 
 export class RegisterMeal extends React.Component {
@@ -23,12 +26,21 @@ export class RegisterMeal extends React.Component {
         food: {
           component: Input,
           label: 'Food',
-          getStatuses: this.getFoodErrors,
+          getMessages: this.getFoodMessages,
           value: '',
         },
         name: {
           component: Input,
           label: 'Name',
+          getMessages: (name) => {
+            if (!(name.isDirty && name.isTouched)) return undefined;
+
+            if (!name.value) {
+              return [{ type: 'error', message: 'Please specify a name' }];
+            }
+
+            return undefined;
+          },
           value: '',
         },
         address: {
@@ -50,8 +62,8 @@ export class RegisterMeal extends React.Component {
     };
   }
 
-  getFoodErrors = (food) => {
-    if (!food.isTouched) return undefined;
+  getFoodMessages = (food) => {
+    if (!(food.isDirty && food.isTouched)) return undefined;
 
     if (!food.value) {
       return [{ type: 'error', message: 'Please specify a food' }];
