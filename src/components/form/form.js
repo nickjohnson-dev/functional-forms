@@ -1,16 +1,17 @@
+import getOr from 'lodash/fp/getOr';
+import map from 'lodash/fp/map';
+import noop from 'lodash/fp/noop';
 import React from 'react';
 import h from 'react-hyperscript';
 import StylePropType from 'react-style-proptype';
-import { replaceById } from '../../helpers';
 import { Field } from '../field/field';
 
 export class Form extends React.Component {
   static propTypes = {
     className: React.PropTypes.string,
-    fields: React.PropTypes.arrayOf(
-      React.PropTypes.object,
-    ).isRequired,
+    fields: React.PropTypes.object.isRequired,
     onFieldsChange: React.PropTypes.func,
+    onFieldTouch: React.PropTypes.func,
     style: StylePropType,
   };
 
@@ -23,15 +24,35 @@ export class Form extends React.Component {
       className: this.props.className,
       style: this.props.style,
     }, [
-      this.props.fields.map(field => h(Field, {
+      this.getFields().map(field => h(Field, {
         className: 'ff-form__field',
-        key: field.id,
+        key: field.key,
         onFieldChange: this.handleFieldChange,
+        onFieldTouch: this.props.onFieldTouch,
         field,
       })),
     ]);
   }
 
-  handleFieldChange = field =>
-    this.props.onFieldsChange(replaceById(field)(this.props.fields));
+  getFields = () => {
+    const fields = getOr({}, 'props.fields', this);
+
+    return map(
+      key => ({
+        ...getOr({}, key, fields),
+        key,
+      }),
+      Object.getOwnPropertyNames(fields),
+    );
+  }
+
+  handleFieldChange = (field) => {
+    const fields = getOr({}, 'props.fields', this);
+    const onFieldsChange = getOr(noop, 'props.onFieldsChange', this);
+
+    onFieldsChange({
+      ...fields,
+      [field.key]: field,
+    });
+  }
 }
