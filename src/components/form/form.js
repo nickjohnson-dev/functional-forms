@@ -6,29 +6,22 @@ import h from 'react-hyperscript';
 import StylePropType from 'react-style-proptype';
 import { Field } from '../field/field';
 
-export class Form extends React.Component {
+export class Form extends React.PureComponent {
   static propTypes = {
     className: React.PropTypes.string,
     fields: React.PropTypes.object.isRequired,
     onFieldsChange: React.PropTypes.func,
-    onFieldTouch: React.PropTypes.func,
     style: StylePropType,
   };
 
-  static defaultProps = {
-    fields: [],
-  };
-
   render() {
-    return h('.ff-form', {
+    return h('div', {
       className: this.props.className,
       style: this.props.style,
     }, [
       this.getFields().map(field => h(Field, {
-        className: 'ff-form__field',
         key: field.key,
         onFieldChange: this.handleFieldChange,
-        onFieldTouch: this.props.onFieldTouch,
         field,
       })),
     ]);

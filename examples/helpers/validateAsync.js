@@ -12,11 +12,16 @@ export function validateAsync(delay, food) {
       window.clearTimeout(timeout);
 
       if (includes(food, foods)) {
-        resolve('');
-        // resolve(`We have plenty of ${food}!`);
+        resolve({
+          type: 'success',
+          message: `We have plenty of ${food}!`,
+        });
       }
 
-      resolve(`There is no ${food} available :(`);
+      resolve({
+        type: 'error',
+        message: `There is no ${food} available :(`,
+      });
     }, delay);
   });
 }

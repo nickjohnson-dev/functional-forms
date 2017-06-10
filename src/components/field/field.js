@@ -1,110 +1,77 @@
 import debounce from 'lodash/fp/debounce';
-import _ from 'lodash/fp';
 import getOr from 'lodash/fp/getOr';
 import isArray from 'lodash/fp/isArray';
+import isEqual from 'lodash/fp/isEqual';
+import map from 'lodash/fp/map';
 import noop from 'lodash/fp/noop';
+import omit from 'lodash/fp/omit';
 import React from 'react';
 import h from 'react-hyperscript';
+import { makeCancelable } from '../../helpers';
+import { NestedForm } from '../NestedForm/NestedForm';
 
-const makeCancelable = (promise) => {
-  let hasCanceled = false;
-
-  const wrappedPromise = new Promise((resolve, reject) => {
-    promise.then(val =>
-      (hasCanceled ? reject({ isCanceled: true }) : resolve(val)),
-    );
-    promise.catch(error =>
-      (hasCanceled ? reject({ isCanceled: true }) : reject(error)),
-    );
-  });
-
-  return {
-    promise: wrappedPromise,
-    cancel() {
-      hasCanceled = true;
-    },
-  };
-};
-
-export class Field extends React.Component {
+export class Field extends React.PureComponent {
   static propTypes = {
-    className: React.PropTypes.string,
     field: React.PropTypes.object.isRequired,
     onFieldChange: React.PropTypes.func.isRequired,
   };
 
-  getErrorsPromise;
-
-  state = {
-    errors: [],
-  };
+  statusesPromise;
 
   componentWillReceiveProps(nextProps) {
-    this.getErrors(nextProps.field)
-      .then(this.setErrors)
-      .catch(() => {});
+    const fieldHasChanged = !isEqual(
+      omit(['statuses'], this.props.field),
+      omit(['statuses'], nextProps.field),
+    );
+
+    if (fieldHasChanged) {
+      this.updateStatuses(nextProps.field);
+    }
   }
 
-  setErrors = debounce(100, errors => this.setState({ errors }));
+  getComponent = () =>
+    getOr(NestedForm, 'props.field.component', this);
 
-  getErrors(field) {
-    this.getErrorsPromise = makeCancelable(new Promise((resolve) => {
-      if (this.getErrorsPromise) this.getErrorsPromise.cancel();
+  getFields = () => {
+    const fields = getOr({}, 'props.field.fields', this);
 
-      const getErrors = getOr(() => [], 'getErrors', field);
-      const errors = getErrors(field);
-
-      if (errors instanceof Promise) {
-        errors.then(resolve);
-        return;
-      }
-
-      if (isArray(errors)) {
-        resolve(errors);
-      }
-
-      resolve([]);
-    }));
-
-    return this.getErrorsPromise.promise;
-  }
-
-  getLabel = () =>
-    this.props.field.label || this.props.field.key;
-
-  handleBlur = (e) => {
-    const field = getOr({}, 'props.field', this);
-    const onBlur = getOr(noop, 'onBlur', field);
-
-    onBlur(e);
+    return map(
+      key => ({
+        ...getOr({}, key, fields),
+        key,
+      }),
+      Object.getOwnPropertyNames(fields),
+    );
   }
 
   handleChange = (value) => {
     const field = getOr({}, 'props.field', this);
     const onFieldChange = getOr(noop, 'props.onFieldChange', this);
 
-
     onFieldChange({
       ...field,
+      isDirty: true,
       value,
     });
 
     this.setState({
-      errors: [],
+      statuses: [],
     });
   };
 
-  handleClick = (e) => {
-    if (!_.isFunction(this.props.field.onClick)) return;
-    this.props.field.onClick(e);
-  };
-
-  handleFocus = (e) => {
+  handleSubfieldChange = (subField) => {
     const field = getOr({}, 'props.field', this);
-    const onFocus = getOr(noop, 'onFocus', field);
+    const fields = getOr({}, 'fields', field);
+    const onFieldChange = getOr(noop, 'props.onFieldChange', this);
 
-    onFocus(e);
-  };
+    onFieldChange({
+      ...field,
+      fields: {
+        ...fields,
+        [subField.key]: subField,
+      },
+    });
+  }
 
   handleIsTouchedChange = (isTouched) => {
     this.props.onFieldChange({
@@ -113,48 +80,51 @@ export class Field extends React.Component {
     });
   };
 
-  handleKeyDown = (e) => {
-    if (!_.isFunction(this.props.field.onKeyDown)) return;
-    this.props.field.onKeyDown(e);
-  };
+  handleStatusesChange = debounce(100, (statuses) => {
+    const field = getOr({}, 'props.field', this);
+    const onFieldChange = getOr(noop, 'props.onFieldChange', this);
 
-  handleKeyPress = (e) => {
-    if (!_.isFunction(this.props.field.onKeyPress)) return;
-    this.props.field.onKeyPress(e);
-  };
+    onFieldChange({
+      ...field,
+      statuses,
+    });
+  });
 
-  handleKeyUp = (e) => {
-    if (!_.isFunction(this.props.field.onKeyUp)) return;
-    this.props.field.onKeyUp(e);
-  };
+  updateStatuses = (field) => {
+    this.statusesPromise = makeCancelable(new Promise((resolve) => {
+      if (this.statusesPromise) this.statusesPromise.cancel();
 
-  handleMouseDown = (e) => {
-    if (!_.isFunction(this.props.field.onMouseDown)) return;
-    this.props.field.onMouseDown(e);
-  };
+      const getStatuses = getOr(() => [], 'getStatuses', field);
+      const statuses = getStatuses(field);
 
-  handleMouseUp = (e) => {
-    if (!_.isFunction(this.props.field.onMouseUp)) return;
-    this.props.field.onMouseUp(e);
-  };
+      if (statuses instanceof Promise) {
+        statuses.then(resolve);
+        return;
+      }
+
+      if (isArray(statuses)) {
+        resolve(statuses);
+      }
+
+      resolve([]);
+    }));
+
+    this.statusesPromise.promise
+      .then(this.handleStatusesChange)
+      .catch(() => {});
+  }
 
   render() {
-    return h(this.props.field.component, {
-      className: this.props.className,
-      errors: this.state.errors,
-      isTouched: !!this.props.field.isTouched,
-      label: this.getLabel(),
-      onBlur: this.handleBlur,
+    return h(this.getComponent(), {
+      field: this.props.field,
       onChange: this.handleChange,
-      onClick: this.handleClick,
-      onFocus: this.handleFocus,
       onIsTouchedChange: this.handleIsTouchedChange,
-      onKeyDown: this.handleKeyDown,
-      onKeyPress: this.handleKeyPress,
-      onKeyUp: this.handleKeyUp,
-      onMouseDown: this.handleMouseDown,
-      onMouseUp: this.handleMouseUp,
-      value: this.props.field.value,
-    });
+    }, [
+      ...this.getFields().map(field => h(Field, {
+        key: field.key,
+        onFieldChange: this.handleSubfieldChange,
+        field,
+      })),
+    ]);
   }
 }

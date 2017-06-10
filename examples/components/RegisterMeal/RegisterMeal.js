@@ -4,6 +4,12 @@ import StylePropType from 'react-style-proptype';
 import { Form, TextField } from '../../../src/index';
 import { validateAsync } from '../../helpers';
 
+const Input = fieldProps => h(TextField, {
+  ...fieldProps,
+  errorClassName: 'error',
+  successClassName: 'success',
+});
+
 export class RegisterMeal extends React.Component {
   static propTypes = {
     className: React.PropTypes.string,
@@ -15,29 +21,50 @@ export class RegisterMeal extends React.Component {
     this.state = {
       fields: {
         food: {
-          component: TextField,
-          getErrors: this.getFoodErrors,
+          component: Input,
+          label: 'Food',
+          getStatuses: this.getFoodErrors,
           value: '',
+        },
+        name: {
+          component: Input,
+          label: 'Name',
+          value: '',
+        },
+        address: {
+          label: 'Address',
+          fields: {
+            street: {
+              component: Input,
+              label: 'Street',
+              value: '',
+            },
+            zip: {
+              component: Input,
+              label: 'ZIP Code',
+              value: '',
+            },
+          },
         },
       },
     };
   }
 
   getFoodErrors = (food) => {
-    // if (!food.isTouched) return [];
+    if (!food.isTouched) return undefined;
 
     if (!food.value) {
-      return ['Please specify a food'];
+      return [{ type: 'error', message: 'Please specify a food' }];
     }
 
-    return validateAsync(1000, food.value)
-      .then(x => (x ? [x] : []));
+    return validateAsync(500, food.value).then(x => [x]);
   };
 
-  handleFieldsChange = fields =>
+  handleFieldsChange = (fields) => {
     this.setState({
       fields,
     });
+  }
 
   render() {
     return h(Form, {

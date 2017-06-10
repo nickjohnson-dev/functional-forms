@@ -3,60 +3,41 @@ import noop from 'lodash/fp/noop';
 import React from 'react';
 import h from 'react-hyperscript';
 
-export class TextField extends React.Component {
+export class TextField extends React.PureComponent {
   static propTypes = {
-    errors: React.PropTypes.arrayOf(
-      React.PropTypes.string,
-    ),
-    isDirty: React.PropTypes.bool,
-    isTouched: React.PropTypes.bool,
-    label: React.PropTypes.string,
-    onBlur: React.PropTypes.func,
+    className: React.PropTypes.string,
+    errorClassName: React.PropTypes.string,
+    field: React.PropTypes.object,
     onChange: React.PropTypes.func,
-    onClick: React.PropTypes.func,
-    onFocus: React.PropTypes.func,
-    onIsDirtyChange: React.PropTypes.func,
     onIsTouchedChange: React.PropTypes.func,
-    onKeyDown: React.PropTypes.func,
-    onKeyPress: React.PropTypes.func,
-    onKeyUp: React.PropTypes.func,
-    onMouseDown: React.PropTypes.func,
-    onMouseUp: React.PropTypes.func,
-    value: React.PropTypes.any,
+    successClassName: React.PropTypes.string,
   };
 
-  render() {
-    return h('.ff-text-field', {
-      style: {
-        display: 'flex',
-        flexDirection: 'column',
-      },
-    }, [
-      h('label.ff-text-field__label', [
-        this.props.label,
-      ]),
-      h('input.ff-text-field__input', {
-        onBlur: this.handleBlur,
-        onChange: this.handleInputChange,
-        onClick: this.props.onClick,
-        onFocus: this.props.onFocus,
-        onKeyDown: this.props.onKeyDown,
-        onKeyPress: this.props.onKeyPress,
-        onKeyUp: this.props.onKeyUp,
-        onMouseDown: this.props.onMouseDown,
-        onMouseUp: this.props.onMouseUp,
-        type: 'text',
-        value: this.props.value,
-      }),
-      this.props.errors.map(error => h('.ff-text-field__error', {
-        key: error,
-      }, [
-        error,
-      ])),
-    ]);
+  getClassName = (status) => {
+    const errorClassName = getOr('', 'props.errorClassName', this);
+    const successClassName = getOr('', 'props.successClassName', this);
+
+    if (status.type === 'error') {
+      return errorClassName;
+    }
+
+    if (status.type === 'success') {
+      return successClassName;
+    }
+
+    return '';
   }
 
-  handleBlur = (e) => {
+  getLabel = () =>
+    getOr('', 'props.field.label', this);
+
+  getStatuses = () =>
+    getOr([], 'props.field.statuses', this);
+
+  getValue = () =>
+    getOr('', 'props.field.value', this);
+
+  handleInputBlur = (e) => {
     const isTouched = getOr(false, 'props.isTouched', this);
     const onBlur = getOr(noop, 'props.onBlur', this);
     const onIsTouchedChange = getOr(noop, 'props.onIsTouchedChange', this);
@@ -69,15 +50,89 @@ export class TextField extends React.Component {
   }
 
   handleInputChange = (e) => {
-    const isDirty = getOr(false, 'props.isDirty', this);
     const onChange = getOr(noop, 'props.onChange', this);
-    const onIsDirtyChange = getOr(noop, 'props.onIsDirtyChange', this);
+    const fieldOnChange = getOr(noop, 'props.field.onChange', this);
     const value = getOr('', 'target.value', e);
 
     onChange(value);
+    fieldOnChange(e);
+  }
 
-    if (!isDirty) {
-      onIsDirtyChange(true);
-    }
+  handleInputClick = (e) => {
+    const onClick = getOr(noop, 'props.field.onClick', this);
+    const field = getOr({}, 'props.field', e);
+
+    onClick(e, field);
+  }
+
+  handleInputFocus = (e) => {
+    const onFocus = getOr(noop, 'props.field.onFocus', this);
+    const field = getOr({}, 'props.field', e);
+
+    onFocus(e, field);
+  }
+
+  handleInputKeyDown = (e) => {
+    const onKeyDown = getOr(noop, 'props.field.onKeyDown', this);
+    const field = getOr({}, 'props.field', e);
+
+    onKeyDown(e, field);
+  }
+
+  handleInputKeyPress = (e) => {
+    const onKeyPress = getOr(noop, 'props.field.onKeyPress', this);
+    const field = getOr({}, 'props.field', e);
+
+    onKeyPress(e, field);
+  }
+
+  handleInputKeyUp = (e) => {
+    const onKeyUp = getOr(noop, 'props.field.onKeyUp', this);
+    const field = getOr({}, 'props.field', e);
+
+    onKeyUp(e, field);
+  }
+
+  handleInputMouseDown = (e) => {
+    const onMouseDown = getOr(noop, 'props.field.onMouseDown', this);
+    const field = getOr({}, 'props.field', e);
+
+    onMouseDown(e, field);
+  }
+
+  handleInputMouseUp = (e) => {
+    const onMouseUp = getOr(noop, 'props.field.onMouseUp', this);
+    const field = getOr({}, 'props.field', e);
+
+    onMouseUp(e, field);
+  }
+
+  render() {
+    return h('div', {
+      className: this.props.className,
+    }, [
+      h('label', [
+        this.getLabel(),
+      ]),
+      h('input', {
+        onBlur: this.handleInputBlur,
+        onChange: this.handleInputChange,
+        onClick: this.handleInputClick,
+        onFocus: this.handleInputFocus,
+        onKeyDown: this.handleKeyDown,
+        onKeyPress: this.handleKeyPress,
+        onKeyUp: this.handleKeyUp,
+        onMouseDown: this.handleMouseDown,
+        onMouseUp: this.handleMouseUp,
+        type: 'text',
+        value: this.getValue(),
+      }),
+      this.getStatuses().map((status, index) => h('div', {
+        className: this.getClassName(status),
+        key: index,
+      }, [
+        status.message,
+      ])),
+    ]);
   }
 }
