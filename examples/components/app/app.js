@@ -2,6 +2,7 @@ import React from 'react';
 import h from 'react-hyperscript';
 import StylePropType from 'react-style-proptype';
 import { RegisterMeal } from '../RegisterMeal/RegisterMeal';
+import './App.css';
 
 export class App extends React.Component {
   static propTypes = {
@@ -10,11 +11,13 @@ export class App extends React.Component {
   };
 
   render() {
-    return h('.app', {
+    return h('.App', {
       className: this.props.className,
       style: this.props.style,
     }, [
-      h(RegisterMeal),
+      h('.App__content', [
+        h(RegisterMeal),
+      ]),
     ]);
   }
 }

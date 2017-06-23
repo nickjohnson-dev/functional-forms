@@ -11,6 +11,9 @@ export class TextField extends React.PureComponent {
     className: React.PropTypes.string,
     errorClassName: React.PropTypes.string,
     field: React.PropTypes.object,
+    messageClassName: React.PropTypes.string,
+    messageErrorClassName: React.PropTypes.string,
+    messageSuccessClassName: React.PropTypes.string,
     onChange: React.PropTypes.func,
     onIsTouchedChange: React.PropTypes.func,
     successClassName: React.PropTypes.string,
@@ -30,18 +33,14 @@ export class TextField extends React.PureComponent {
   }
 
   getMessageClassName = (message) => {
-    const errorMessageClassName = getOr('', 'props.errorMessageClassName', this);
-    const successMessageClassName = getOr('', 'props.successMessageClassName', this);
+    const messageClassName = getOr('', 'props.messageClassName', this);
+    const messageErrorClassName = getOr('', 'props.messageErrorClassName', this);
+    const messageSuccessClassName = getOr('', 'props.messageSuccessClassName', this);
 
-    if (message.type === 'error') {
-      return errorMessageClassName;
-    }
-
-    if (message.type === 'success') {
-      return successMessageClassName;
-    }
-
-    return '';
+    return classnames({
+      [messageErrorClassName]: message.type === 'error',
+      [messageSuccessClassName]: message.type === 'success',
+    }, messageClassName);
   }
 
   getLabel = () =>

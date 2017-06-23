@@ -14,19 +14,6 @@ export class Form extends React.PureComponent {
     style: StylePropType,
   };
 
-  render() {
-    return h('div', {
-      className: this.props.className,
-      style: this.props.style,
-    }, [
-      this.getFields().map(field => h(Field, {
-        key: field.key,
-        onFieldChange: this.handleFieldChange,
-        field,
-      })),
-    ]);
-  }
-
   getFields = () => {
     const fields = getOr({}, 'props.fields', this);
 
@@ -47,5 +34,18 @@ export class Form extends React.PureComponent {
       ...fields,
       [field.key]: field,
     });
+  }
+
+  render() {
+    return h('div', {
+      className: this.props.className,
+      style: this.props.style,
+    }, [
+      this.getFields().map(field => h(Field, {
+        key: field.key,
+        onFieldChange: this.handleFieldChange,
+        field,
+      })),
+    ]);
   }
 }

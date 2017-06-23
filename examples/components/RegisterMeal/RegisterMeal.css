@@ -1,0 +1,52 @@
+.RegisterMeal {
+  background-color: white;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.RegisterMeal .RegisterMeal__sub-form .RegisterMeal__sub-form__label {
+  font-size: 1.5em;
+  margin-bottom: 24px;
+}
+
+.RegisterMeal .RegisterMeal__field {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.RegisterMeal .RegisterMeal__field > label {
+  margin-bottom: 8px;
+}
+
+.RegisterMeal .RegisterMeal__field > input {
+  border: 1px solid #999;
+  border-radius: 4px;
+  height: 40px;
+  outline: none;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.RegisterMeal .RegisterMeal__field--error > input {
+  border-color: firebrick;
+}
+
+.RegisterMeal .RegisterMeal__field--success > input {
+  border-color: limegreen;
+}
+
+.RegisterMeal .RegisterMeal__field__message {
+  margin-top: 4px;
+}
+
+.RegisterMeal .RegisterMeal__field__message--error {
+  color: firebrick;
+}
+
+.RegisterMeal .RegisterMeal__field__message--success {
+  color: limegreen;
+}

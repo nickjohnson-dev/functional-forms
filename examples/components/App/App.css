@@ -1,0 +1,19 @@
+.App {
+  align-items: center;
+  background-color: #f5f5f5;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.App__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  max-width: 768px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+}
